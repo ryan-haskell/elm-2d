@@ -1,6 +1,8 @@
 # ryannhg/elm-2d
 > a package for building games in WebGL
 
+![A screenshot of a 2D game example](./examples/screenshots/spritesheets.png)
+
 ## install
 
 ```bash
@@ -31,7 +33,8 @@ main =
 
 ```
 
-![A screenshot of a blue rectangle](./examples/screenshot.png)
+![A screenshot of a yello rectangle](./examples/screenshots/intro.png)
+
 
 ### even more examples
 

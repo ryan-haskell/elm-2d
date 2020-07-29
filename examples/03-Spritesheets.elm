@@ -1,4 +1,4 @@
-module Examples.Images exposing (main)
+module Examples.Spritesheets exposing (main)
 
 import Browser
 import Color
