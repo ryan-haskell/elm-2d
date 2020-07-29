@@ -10,7 +10,8 @@ import WebGL.Texture exposing (Texture)
 
 type alias Sprite =
     { size : Int
-    , coordinates : ( Int, Int )
+    , topLeft : ( Int, Int )
+    , bottomRight : ( Int, Int )
     , texture : Texture
     }
 

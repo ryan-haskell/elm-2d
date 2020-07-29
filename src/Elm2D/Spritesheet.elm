@@ -3,6 +3,7 @@ module Elm2D.Spritesheet exposing
     , Sprite
     , Spritesheet
     , load
+    , region
     , select
     )
 
@@ -41,7 +42,18 @@ select : ( Int, Int ) -> Spritesheet -> Sprite
 select coordinates (Spritesheet size texture) =
     Internals.Sprite.wrap
         { size = size
-        , coordinates = coordinates
+        , topLeft = coordinates
+        , bottomRight = coordinates
+        , texture = texture
+        }
+
+
+region : ( Int, Int ) -> ( Int, Int ) -> Spritesheet -> Sprite
+region topLeft bottomRight (Spritesheet size texture) =
+    Internals.Sprite.wrap
+        { size = size
+        , topLeft = topLeft
+        , bottomRight = bottomRight
         , texture = texture
         }
 

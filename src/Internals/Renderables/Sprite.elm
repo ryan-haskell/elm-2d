@@ -28,7 +28,8 @@ view settings options =
             , texture = options.sprite.texture
             , textureSize = Texture.size options.sprite.texture |> coordinatesToVector
             , selectionSize = toFloat options.sprite.size
-            , selectionPosition = coordinatesToVector options.sprite.coordinates
+            , topLeft = coordinatesToVector options.sprite.topLeft
+            , bottomRight = coordinatesToVector options.sprite.bottomRight
             }
     in
     WebGL.entity vertex fragment mesh uniforms
@@ -52,7 +53,8 @@ type alias Uniforms =
     { texture : Texture
     , textureSize : Vec2
     , selectionSize : Float
-    , selectionPosition : Vec2
+    , topLeft : Vec2
+    , bottomRight : Vec2
     , position : Vec2
     , size : Vec2
     , window : Vec2
@@ -94,12 +96,13 @@ precision mediump float;
 uniform sampler2D texture;
 uniform vec2 textureSize;
 uniform float selectionSize;
-uniform vec2 selectionPosition;
+uniform vec2 topLeft;
+uniform vec2 bottomRight;
 varying vec2 vindex;
 
 void main () {
   gl_FragColor = texture2D(texture,
-    (vindex + selectionPosition)
+    (vindex * (bottomRight - topLeft + vec2(1, 1)) + topLeft)
         / textureSize
         * vec2(selectionSize, selectionSize)
         * vec2(1, -1));

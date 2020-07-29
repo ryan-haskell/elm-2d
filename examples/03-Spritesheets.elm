@@ -32,7 +32,7 @@ init _ =
       }
     , Spritesheet.load
         { tileSize = 16
-        , file = "assets/tileset.png" -- https://fikry13.itch.io/another-rpg-tileset
+        , file = "assets/tileset.png" -- Artwork from: https://fikry13.itch.io/another-rpg-tileset
         , onLoad = LoadedSpritesheet
         }
     )
@@ -103,9 +103,29 @@ viewScene spritesheet =
             , position = ( 192, 192 )
             }
         , Elm2D.sprite
-            { sprite = sprites.rock
-            , size = ( 64, 64 )
-            , position = ( 512, 320 )
+            { sprite = sprites.forest.left
+            , size = ( 128, 256 )
+            , position = ( 320, -32 )
+            }
+        , Elm2D.sprite
+            { sprite = sprites.forest.middle
+            , size = ( 64, 256 )
+            , position = ( 448, -32 )
+            }
+        , Elm2D.sprite
+            { sprite = sprites.forest.middle
+            , size = ( 64, 256 )
+            , position = ( 512, -32 )
+            }
+        , Elm2D.sprite
+            { sprite = sprites.forest.right
+            , size = ( 128, 256 )
+            , position = ( 576, -32 )
+            }
+        , Elm2D.sprite
+            { sprite = sprites.tree
+            , size = ( 256, 256 )
+            , position = ( 414, 192 )
             }
         ]
 
@@ -116,9 +136,21 @@ spritesFor :
         { chest : Sprite
         , rock : Sprite
         , bush : Sprite
+        , tree : Sprite
+        , forest :
+            { left : Sprite
+            , middle : Sprite
+            , right : Sprite
+            }
         }
 spritesFor sheet =
-    { chest = sheet |> Spritesheet.select ( 2, 6 )
+    { chest = sheet |> Spritesheet.select ( 3, 6 )
     , rock = sheet |> Spritesheet.select ( 7, 4 )
     , bush = sheet |> Spritesheet.select ( 5, 4 )
+    , tree = sheet |> Spritesheet.region ( 3, 1 ) ( 5, 3 )
+    , forest =
+        { left = sheet |> Spritesheet.region ( 2, 7 ) ( 3, 10 )
+        , middle = sheet |> Spritesheet.region ( 4, 7 ) ( 4, 10 )
+        , right = sheet |> Spritesheet.region ( 5, 7 ) ( 6, 10 )
+        }
     }
