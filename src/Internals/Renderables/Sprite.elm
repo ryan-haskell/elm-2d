@@ -5,7 +5,6 @@ import Internals.Settings exposing (Settings)
 import Internals.Size exposing (Size)
 import Internals.Sprite
 import Math.Vector2 exposing (Vec2, vec2)
-import Math.Vector4 exposing (Vec4)
 import WebGL
 import WebGL.Texture as Texture exposing (Texture)
 
