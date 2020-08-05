@@ -1,7 +1,7 @@
 # ryannhg/elm-2d
 > a package for building games in WebGL
 
-![An example of a 2D game](./examples/screenshots/animation.mp4)
+![An example of a 2D game](./examples/screenshots/animations.png)
 
 ## install
 
