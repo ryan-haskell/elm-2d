@@ -1,6 +1,6 @@
 module Elm2D exposing
     ( view
-    , Renderable, rectangle, sprite
+    , Element, rectangle, sprite
     )
 
 {-|
@@ -8,7 +8,7 @@ module Elm2D exposing
 @docs view
 @docs Size, Position
 
-@docs Renderable, rectangle, sprite
+@docs Element, rectangle, sprite
 
 -}
 
@@ -27,9 +27,9 @@ view :
     { size : ( Float, Float )
     , background : Color
     }
-    -> List Renderable
+    -> List Element
     -> Html msg
-view options renderables =
+view options children =
     WebGL.toHtml
         [ Attr.width (floor (Tuple.first options.size))
         , Attr.height (floor (Tuple.second options.size))
@@ -39,17 +39,17 @@ view options renderables =
         (List.foldl
             (\item list -> render { size = options.size } item :: list)
             []
-            renderables
+            children
         )
 
 
 
--- RENDERABLES
+-- ELEMENTS
 
 
-type Renderable
+type Element
     = Rectangle_ Rectangle.Options
-    | Sprite_ Sprite.Options
+    | SpriteElement Sprite.Options
 
 
 rectangle :
@@ -57,7 +57,7 @@ rectangle :
     , position : ( Float, Float )
     , color : Color
     }
-    -> Renderable
+    -> Element
 rectangle =
     Rectangle_
 
@@ -67,20 +67,20 @@ sprite :
     , size : ( Float, Float )
     , position : ( Float, Float )
     }
-    -> Renderable
+    -> Element
 sprite options =
-    Sprite_
+    SpriteElement
         { sprite = Internals.Sprite.unwrap options.sprite
         , size = options.size
         , position = options.position
         }
 
 
-render : Settings -> Renderable -> WebGL.Entity
+render : Settings -> Element -> WebGL.Entity
 render settings item =
     case item of
         Rectangle_ options ->
             Rectangle.view settings options
 
-        Sprite_ options ->
+        SpriteElement options ->
             Sprite.view settings options
