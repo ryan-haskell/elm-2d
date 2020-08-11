@@ -180,7 +180,7 @@ movePlayer delta ( dx, dy ) isJumping player =
             delta * 0.025
 
         jump =
-            delta * 0.5
+            delta * 0.8
 
         onGround : Bool
         onGround =
@@ -195,7 +195,9 @@ movePlayer delta ( dx, dy ) isJumping player =
                 )
 
             else
-                ( vx, vy )
+                ( vx + (dx * speed * 0.25)
+                , vy + (dy * speed * 0.25)
+                )
 
         applyFriction : Velocity -> Velocity
         applyFriction ( vx, vy ) =
