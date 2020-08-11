@@ -1,12 +1,18 @@
 module Elm2D.Spritesheet exposing
-    ( Loadable(..)
-    , Sprite
-    , Spritesheet
-    , load
-    , region
-    , select
+    ( Spritesheet, load
+    , Sprite, select, region
+    , Animation, animation, frame
     )
 
+{-|
+
+@docs Spritesheet, load
+@docs Sprite, select, region
+@docs Animation, animation, frame
+
+-}
+
+import Array exposing (Array)
 import Internals.Sprite exposing (Sprite)
 import Task
 import WebGL.Texture exposing (defaultOptions)
@@ -16,30 +22,32 @@ type Spritesheet
     = Spritesheet Int WebGL.Texture.Texture
 
 
-type Loadable spritesheet
-    = Loading
-    | Success spritesheet
-    | Failure WebGL.Texture.Error
-
-
 options_ : WebGL.Texture.Options
 options_ =
     { defaultOptions | magnify = WebGL.Texture.nearest }
 
 
-load : { tileSize : Int, file : String, onLoad : Loadable Spritesheet -> msg } -> Cmd msg
+load :
+    { tileSize : Int
+    , file : String
+    , onLoad : Maybe Spritesheet -> msg
+    }
+    -> Cmd msg
 load options =
-    WebGL.Texture.loadWith options_
-        options.file
-        |> Task.attempt (toLoadable options.tileSize >> options.onLoad)
+    WebGL.Texture.loadWith options_ options.file
+        |> Task.attempt
+            (Result.toMaybe
+                >> Maybe.map (Spritesheet options.tileSize)
+                >> options.onLoad
+            )
 
 
 type alias Sprite =
     Internals.Sprite.ProtectedSprite
 
 
-select : ( Int, Int ) -> Spritesheet -> Sprite
-select coordinates (Spritesheet size texture) =
+select : Spritesheet -> ( Int, Int ) -> Sprite
+select (Spritesheet size texture) coordinates =
     Internals.Sprite.wrap
         { size = size
         , topLeft = coordinates
@@ -48,8 +56,8 @@ select coordinates (Spritesheet size texture) =
         }
 
 
-region : ( Int, Int ) -> ( Int, Int ) -> Spritesheet -> Sprite
-region topLeft bottomRight (Spritesheet size texture) =
+region : Spritesheet -> ( Int, Int ) -> ( Int, Int ) -> Sprite
+region (Spritesheet size texture) topLeft bottomRight =
     Internals.Sprite.wrap
         { size = size
         , topLeft = topLeft
@@ -59,14 +67,30 @@ region topLeft bottomRight (Spritesheet size texture) =
 
 
 
--- INTERNALS
+-- Animations
 
 
-toLoadable : Int -> Result WebGL.Texture.Error WebGL.Texture.Texture -> Loadable Spritesheet
-toLoadable tileSize result =
-    case result of
-        Ok texture ->
-            Success (Spritesheet tileSize texture)
+type Animation
+    = Animation Spritesheet (Array Sprite)
 
-        Err reason ->
-            Failure reason
+
+animation : Spritesheet -> List ( Int, Int ) -> Animation
+animation spritesheet indices =
+    indices
+        |> List.map (select spritesheet)
+        |> Array.fromList
+        |> Animation spritesheet
+
+
+frame : Int -> Animation -> Sprite
+frame i (Animation (Spritesheet _ texture) array) =
+    array
+        |> Array.get (modBy (Array.length array) i)
+        |> Maybe.withDefault
+            (Internals.Sprite.wrap
+                { size = 0
+                , topLeft = ( 0, 0 )
+                , bottomRight = ( 0, 0 )
+                , texture = texture
+                }
+            )

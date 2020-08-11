@@ -5,7 +5,7 @@ import Browser
 import Browser.Events
 import Color
 import Elm2D
-import Elm2D.Spritesheet as Spritesheet exposing (Loadable, Sprite, Spritesheet)
+import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 import Time
 
@@ -25,16 +25,16 @@ main =
 
 
 type alias Model =
-    { tileset : Loadable Spritesheet
-    , dungeon : Loadable Spritesheet
+    { tileset : Maybe Spritesheet
+    , dungeon : Maybe Spritesheet
     , counter : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { tileset = Spritesheet.Loading
-      , dungeon = Spritesheet.Loading
+    ( { tileset = Nothing
+      , dungeon = Nothing
       , counter = 0
       }
     , Cmd.batch
@@ -57,7 +57,7 @@ init _ =
 
 
 type Msg
-    = Loaded Asset (Loadable Spritesheet)
+    = Loaded Asset (Maybe Spritesheet)
     | TickAnimation Float
 
 
@@ -69,13 +69,13 @@ type Asset
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Loaded Tileset loadable ->
-            ( { model | tileset = loadable }
+        Loaded Tileset spritesheet ->
+            ( { model | tileset = spritesheet }
             , Cmd.none
             )
 
-        Loaded Dungeon loadable ->
-            ( { model | dungeon = loadable }
+        Loaded Dungeon spritesheet ->
+            ( { model | dungeon = spritesheet }
             , Cmd.none
             )
 
@@ -96,25 +96,17 @@ subscriptions _ =
 
 view : Model -> Html msg
 view model =
-    case ( model.tileset, model.dungeon ) of
-        ( Spritesheet.Success t, Spritesheet.Success d ) ->
-            viewScene model { tileset = t, dungeon = d }
-
-        ( Spritesheet.Failure reason, _ ) ->
-            Html.text (Debug.toString reason)
-
-        ( _, Spritesheet.Failure reason ) ->
-            Html.text (Debug.toString reason)
-
-        _ ->
-            Html.text "Loading..."
+    Maybe.map2 (viewScene model)
+        model.tileset
+        model.dungeon
+        |> Maybe.withDefault (Html.text "Loading...")
 
 
-viewScene : Model -> { tileset : Spritesheet, dungeon : Spritesheet } -> Html msg
-viewScene model spritesheets =
+viewScene : Model -> Spritesheet -> Spritesheet -> Html msg
+viewScene model tileset dungeon =
     let
         sprites =
-            spritesFor spritesheets
+            spritesFor tileset dungeon
 
         animatedSprites options =
             options.sprites
@@ -191,7 +183,8 @@ viewScene model spritesheets =
 
 
 spritesFor :
-    { tileset : Spritesheet, dungeon : Spritesheet }
+    Spritesheet
+    -> Spritesheet
     ->
         { chest : Sprite
         , rock : Sprite
@@ -210,15 +203,25 @@ spritesFor :
             { run : Array Sprite
             }
         }
-spritesFor { tileset, dungeon } =
-    { chest = tileset |> Spritesheet.select ( 3, 6 )
-    , rock = tileset |> Spritesheet.select ( 7, 4 )
-    , bush = tileset |> Spritesheet.select ( 5, 4 )
-    , tree = tileset |> Spritesheet.region ( 3, 1 ) ( 5, 3 )
+spritesFor tileset dungeon =
+    let
+        select =
+            Spritesheet.select tileset
+
+        region =
+            Spritesheet.region tileset
+
+        dungeonRegion =
+            dungeon |> Spritesheet.region
+    in
+    { chest = select ( 3, 6 )
+    , rock = select ( 7, 4 )
+    , bush = select ( 5, 4 )
+    , tree = region ( 3, 1 ) ( 5, 3 )
     , forest =
-        { left = tileset |> Spritesheet.region ( 2, 7 ) ( 3, 10 )
-        , middle = tileset |> Spritesheet.region ( 4, 7 ) ( 4, 10 )
-        , right = tileset |> Spritesheet.region ( 5, 7 ) ( 6, 10 )
+        { left = region ( 2, 7 ) ( 3, 10 )
+        , middle = region ( 4, 7 ) ( 4, 10 )
+        , right = region ( 5, 7 ) ( 6, 10 )
         }
     , elf =
         { idle = animation dungeon ( 16, 28 ) ( 128, 36 ) 4
@@ -227,10 +230,10 @@ spritesFor { tileset, dungeon } =
     , wizard =
         { run =
             Array.fromList
-                [ dungeon |> Spritesheet.region ( 192 + (16 * 0), 164 ) ( 192 + 15 + (16 * 0), 164 + 28 )
-                , dungeon |> Spritesheet.region ( 192 + (16 * 1), 164 ) ( 192 + 15 + (16 * 1), 164 + 28 )
-                , dungeon |> Spritesheet.region ( 192 + (16 * 2), 164 ) ( 192 + 15 + (16 * 2), 164 + 28 )
-                , dungeon |> Spritesheet.region ( 192 + (16 * 3), 164 ) ( 192 + 15 + (16 * 3), 164 + 28 )
+                [ dungeonRegion ( 192 + (16 * 0), 164 ) ( 192 + 15 + (16 * 0), 164 + 28 )
+                , dungeonRegion ( 192 + (16 * 1), 164 ) ( 192 + 15 + (16 * 1), 164 + 28 )
+                , dungeonRegion ( 192 + (16 * 2), 164 ) ( 192 + 15 + (16 * 2), 164 + 28 )
+                , dungeonRegion ( 192 + (16 * 3), 164 ) ( 192 + 15 + (16 * 3), 164 + 28 )
                 ]
         }
     }
@@ -239,5 +242,5 @@ spritesFor { tileset, dungeon } =
 animation : Spritesheet -> ( Int, Int ) -> ( Int, Int ) -> Int -> Array Sprite
 animation sheet ( w, h ) ( x, y ) count =
     List.range 1 count
-        |> List.map (\i -> sheet |> Spritesheet.region ( x + (w * (i - 1)), y ) ( x + (w * i), y + h ))
+        |> List.map (\i -> Spritesheet.region sheet ( x + (w * (i - 1)), y ) ( x + (w * i), y + h ))
         |> Array.fromList

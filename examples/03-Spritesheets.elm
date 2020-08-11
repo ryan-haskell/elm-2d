@@ -3,7 +3,7 @@ module Examples.Spritesheets exposing (main)
 import Browser
 import Color
 import Elm2D
-import Elm2D.Spritesheet as Spritesheet exposing (Loadable, Sprite, Spritesheet)
+import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 
 
@@ -22,13 +22,13 @@ main =
 
 
 type alias Model =
-    { loadableSpritesheet : Loadable Spritesheet
+    { loadableSpritesheet : Maybe Spritesheet
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { loadableSpritesheet = Spritesheet.Loading
+    ( { loadableSpritesheet = Nothing
       }
     , Spritesheet.load
         { tileSize = 16
@@ -43,14 +43,14 @@ init _ =
 
 
 type Msg
-    = LoadedSpritesheet (Loadable Spritesheet)
+    = LoadedSpritesheet (Maybe Spritesheet)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadedSpritesheet loadable ->
-            ( { model | loadableSpritesheet = loadable }
+        LoadedSpritesheet spritesheet ->
+            ( { model | loadableSpritesheet = spritesheet }
             , Cmd.none
             )
 
@@ -67,13 +67,10 @@ subscriptions _ =
 view : Model -> Html msg
 view model =
     case model.loadableSpritesheet of
-        Spritesheet.Loading ->
+        Nothing ->
             Html.text "Loading..."
 
-        Spritesheet.Failure reason ->
-            Html.text (Debug.toString reason)
-
-        Spritesheet.Success spritesheet ->
+        Just spritesheet ->
             viewScene spritesheet
 
 
@@ -144,13 +141,20 @@ spritesFor :
             }
         }
 spritesFor sheet =
-    { chest = sheet |> Spritesheet.select ( 3, 6 )
-    , rock = sheet |> Spritesheet.select ( 7, 4 )
-    , bush = sheet |> Spritesheet.select ( 5, 4 )
-    , tree = sheet |> Spritesheet.region ( 3, 1 ) ( 5, 3 )
+    let
+        select =
+            Spritesheet.select sheet
+
+        region =
+            Spritesheet.region sheet
+    in
+    { chest = select ( 3, 6 )
+    , rock = select ( 7, 4 )
+    , bush = select ( 5, 4 )
+    , tree = region ( 3, 1 ) ( 5, 3 )
     , forest =
-        { left = sheet |> Spritesheet.region ( 2, 7 ) ( 3, 10 )
-        , middle = sheet |> Spritesheet.region ( 4, 7 ) ( 4, 10 )
-        , right = sheet |> Spritesheet.region ( 5, 7 ) ( 6, 10 )
+        { left = region ( 2, 7 ) ( 3, 10 )
+        , middle = region ( 4, 7 ) ( 4, 10 )
+        , right = region ( 5, 7 ) ( 6, 10 )
         }
     }

@@ -3,7 +3,7 @@ module Examples.Images exposing (main)
 import Browser
 import Color
 import Elm2D
-import Elm2D.Spritesheet as Spritesheet exposing (Loadable, Sprite, Spritesheet)
+import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 
 
@@ -22,13 +22,13 @@ main =
 
 
 type alias Model =
-    { loadableSpritesheet : Loadable Spritesheet
+    { spritesheet : Maybe Spritesheet
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { loadableSpritesheet = Spritesheet.Loading
+    ( { spritesheet = Nothing
       }
     , Spritesheet.load
         { tileSize = 16
@@ -43,14 +43,14 @@ init _ =
 
 
 type Msg
-    = LoadedSpritesheet (Loadable Spritesheet)
+    = LoadedSpritesheet (Maybe Spritesheet)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadedSpritesheet loadable ->
-            ( { model | loadableSpritesheet = loadable }
+        LoadedSpritesheet spritesheet ->
+            ( { model | spritesheet = spritesheet }
             , Cmd.none
             )
 
@@ -66,15 +66,12 @@ subscriptions _ =
 
 view : Model -> Html msg
 view model =
-    case model.loadableSpritesheet of
-        Spritesheet.Loading ->
+    case model.spritesheet of
+        Nothing ->
             Html.text "Loading..."
 
-        Spritesheet.Failure reason ->
-            Html.text (Debug.toString reason)
-
-        Spritesheet.Success spritesheet ->
-            viewScene spritesheet
+        Just spritesheet_ ->
+            viewScene spritesheet_
 
 
 viewScene : Spritesheet -> Html msg
@@ -118,7 +115,11 @@ spritesFor :
         , bush : Sprite
         }
 spritesFor sheet =
-    { chest = sheet |> Spritesheet.select ( 2, 6 )
-    , rock = sheet |> Spritesheet.select ( 7, 4 )
-    , bush = sheet |> Spritesheet.select ( 5, 4 )
+    let
+        select =
+            Spritesheet.select sheet
+    in
+    { chest = select ( 2, 6 )
+    , rock = select ( 7, 4 )
+    , bush = select ( 5, 4 )
     }
