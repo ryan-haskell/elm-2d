@@ -40,6 +40,7 @@ main =
 You can see more interesting examples in this project's `examples` folder. Clone this repo and run:
 
 ```
+cd examples/
 elm reactor
 ```
 
