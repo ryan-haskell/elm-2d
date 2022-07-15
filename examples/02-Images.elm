@@ -72,7 +72,7 @@ view model =
     in
     Elm2D.view
         { size = ( 640, 480 )
-        , background = Elm2D.Color.rgb ( 0.25, 0.7, 0.5 )
+        , background = Elm2D.Color.fromRgb ( 0.25, 0.7, 0.5 )
         }
         [ Elm2D.sprite
             { sprite = sprites.chest
