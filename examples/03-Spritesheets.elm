@@ -22,13 +22,13 @@ main =
 
 
 type alias Model =
-    { loadableSpritesheet : Maybe Spritesheet
+    { maybeSpritesheet : Maybe Spritesheet
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { loadableSpritesheet = Nothing
+    ( { maybeSpritesheet = Nothing
       }
     , Spritesheet.load
         { tileSize = 16
@@ -49,8 +49,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadedSpritesheet spritesheet ->
-            ( { model | loadableSpritesheet = spritesheet }
+        LoadedSpritesheet maybeSpritesheet ->
+            ( { model | maybeSpritesheet = maybeSpritesheet }
             , Cmd.none
             )
 
@@ -66,7 +66,7 @@ subscriptions _ =
 
 view : Model -> Html msg
 view model =
-    case model.loadableSpritesheet of
+    case model.maybeSpritesheet of
         Nothing ->
             Html.text "Loading..."
 

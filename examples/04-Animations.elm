@@ -7,7 +7,6 @@ import Color
 import Elm2D
 import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
-import Time
 
 
 main : Program () Model Msg
