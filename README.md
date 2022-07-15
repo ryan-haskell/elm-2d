@@ -6,6 +6,7 @@
 ## install
 
 ```bash
+# ( 👇 this command won't work unless I publish this! )
 elm install ryannhg/elm-2d
 ```
 
