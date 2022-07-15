@@ -3,9 +3,9 @@ module Examples.Animations exposing (main)
 import Array exposing (Array)
 import Browser
 import Browser.Events
-import Color
 import Elm2D
-import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
+import Elm2D.Color
+import Elm2D.Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 
 
@@ -24,25 +24,25 @@ main =
 
 
 type alias Model =
-    { tileset : Maybe Spritesheet
-    , dungeon : Maybe Spritesheet
+    { tileset : Spritesheet
+    , dungeon : Spritesheet
     , counter : Int
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { tileset = Nothing
-      , dungeon = Nothing
+    ( { tileset = Elm2D.Spritesheet.blank
+      , dungeon = Elm2D.Spritesheet.blank
       , counter = 0
       }
     , Cmd.batch
-        [ Spritesheet.load
+        [ Elm2D.Spritesheet.load
             { tileSize = 16
             , file = "assets/tileset.png" -- Artwork from: https://fikry13.itch.io/another-rpg-tileset
             , onLoad = Loaded Tileset
             }
-        , Spritesheet.load
+        , Elm2D.Spritesheet.load
             { tileSize = 1
             , file = "assets/dungeon-tileset.png" -- Artwork from: https://0x72.itch.io/dungeontileset-ii
             , onLoad = Loaded Dungeon
@@ -56,7 +56,7 @@ init _ =
 
 
 type Msg
-    = Loaded Asset (Maybe Spritesheet)
+    = Loaded Asset Spritesheet
     | TickAnimation Float
 
 
@@ -95,17 +95,9 @@ subscriptions _ =
 
 view : Model -> Html msg
 view model =
-    Maybe.map2 (viewScene model)
-        model.tileset
-        model.dungeon
-        |> Maybe.withDefault (Html.text "Loading...")
-
-
-viewScene : Model -> Spritesheet -> Spritesheet -> Html msg
-viewScene model tileset dungeon =
     let
         sprites =
-            spritesFor tileset dungeon
+            spritesFor model
 
         animatedSprites options =
             options.sprites
@@ -121,7 +113,7 @@ viewScene model tileset dungeon =
     in
     Elm2D.view
         { size = ( 640, 480 )
-        , background = Color.rgb 0.25 0.7 0.5
+        , background = Color.rgb ( 0.25, 0.7, 0.5 )
         }
         [ animatedSprites
             { sprites = sprites.wizard.run
@@ -182,8 +174,7 @@ viewScene model tileset dungeon =
 
 
 spritesFor :
-    Spritesheet
-    -> Spritesheet
+    Model
     ->
         { chest : Sprite
         , rock : Sprite
@@ -202,16 +193,16 @@ spritesFor :
             { run : Array Sprite
             }
         }
-spritesFor tileset dungeon =
+spritesFor { tileset, dungeon } =
     let
         select =
-            Spritesheet.select tileset
+            Elm2D.Spritesheet.select tileset
 
         region =
-            Spritesheet.region tileset
+            Elm2D.Spritesheet.region tileset
 
         dungeonRegion =
-            dungeon |> Spritesheet.region
+            dungeon |> Elm2D.Spritesheet.region
     in
     { chest = select ( 3, 6 )
     , rock = select ( 7, 4 )
@@ -241,5 +232,5 @@ spritesFor tileset dungeon =
 animation : Spritesheet -> ( Int, Int ) -> ( Int, Int ) -> Int -> Array Sprite
 animation sheet ( w, h ) ( x, y ) count =
     List.range 1 count
-        |> List.map (\i -> Spritesheet.region sheet ( x + (w * (i - 1)), y ) ( x + (w * i), y + h ))
+        |> List.map (\i -> Elm2D.Spritesheet.region sheet ( x + (w * (i - 1)), y ) ( x + (w * i), y + h ))
         |> Array.fromList

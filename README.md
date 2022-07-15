@@ -7,7 +7,6 @@
 
 ```bash
 elm install ryannhg/elm-2d
-elm install avh4/color
 ```
 
 ## an example
@@ -15,25 +14,25 @@ elm install avh4/color
 ```elm
 module Examples.Shapes exposing (main)
 
-import Color
-import Elm2D
+import Elm2D exposing (Html)
+import Elm2D.Color
 
 
+main : Html msg
 main =
     Elm2D.view
-        { background = Color.blue
+        { background = Elm2D.Color.fromRgb255 ( 0, 0, 100 )
         , size = ( 800, 600 )
         }
         [ Elm2D.rectangle
-            { color = Color.yellow
+            { color = Elm2D.Color.fromRgb255 ( 200, 200, 0 )
             , position = ( 350, 250 )
             , size = ( 100, 100 )
             }
         ]
-
 ```
 
-![A screenshot of a yello rectangle](./examples/screenshots/intro.png)
+![A screenshot of a yellow rectangle](./examples/screenshots/intro.png)
 
 
 ### even more examples

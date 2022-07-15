@@ -2,8 +2,8 @@ module Examples.Platformer exposing (main)
 
 import Browser
 import Browser.Events
-import Color
 import Elm2D
+import Elm2D.Color
 import Html exposing (Html)
 import Json.Decode as Json
 import Set exposing (Set)
@@ -106,15 +106,18 @@ size =
 
 view : Model -> Html Msg
 view model =
-    Elm2D.view
-        { size = size
-        , background = Color.black
-        }
-        [ Elm2D.rectangle
-            { color = Color.blue
-            , size = model.player.size
-            , position = model.player.position
+    Html.div []
+        [ Html.p [] [ Html.text "( WASD to move, spacebar to jump! )" ]
+        , Elm2D.view
+            { size = size
+            , background = Elm2D.Color.fromRgb255 ( 100, 100, 100 )
             }
+            [ Elm2D.rectangle
+                { color = Elm2D.Color.fromRgb255 ( 120, 200, 200 )
+                , size = model.player.size
+                , position = model.player.position
+                }
+            ]
         ]
 
 

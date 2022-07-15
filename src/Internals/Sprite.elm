@@ -12,7 +12,7 @@ type alias Sprite =
     { size : Int
     , topLeft : ( Int, Int )
     , bottomRight : ( Int, Int )
-    , texture : Texture
+    , texture : Maybe Texture
     }
 
 

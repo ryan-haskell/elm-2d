@@ -1,6 +1,8 @@
 module Internals.Renderables.Sprite exposing (Options, view)
 
+import Elm2D.Color
 import Internals.Position exposing (Position)
+import Internals.Renderables.Rectangle
 import Internals.Settings exposing (Settings)
 import Internals.Size exposing (Size)
 import Internals.Sprite
@@ -19,19 +21,30 @@ type alias Options =
 view : Settings -> Options -> WebGL.Entity
 view settings options =
     let
-        uniforms : Uniforms
-        uniforms =
+        uniforms : Texture -> Uniforms
+        uniforms texture =
             { position = Internals.Position.toVector options.position
             , size = Internals.Size.toVector options.size
             , window = Internals.Size.toVector settings.size
-            , texture = options.sprite.texture
-            , textureSize = Texture.size options.sprite.texture |> coordinatesToVector
+            , texture = texture
+            , textureSize = Texture.size texture |> coordinatesToVector
             , selectionSize = toFloat options.sprite.size
             , topLeft = coordinatesToVector options.sprite.topLeft
             , bottomRight = coordinatesToVector options.sprite.bottomRight
             }
     in
-    WebGL.entity vertex fragment mesh uniforms
+    case options.sprite.texture of
+        Just texture ->
+            WebGL.entity vertex fragment mesh (uniforms texture)
+
+        Nothing ->
+            Internals.Renderables.Rectangle.view
+                { size = settings.size
+                }
+                { position = options.position
+                , size = options.size
+                , color = Elm2D.Color.fromRgba ( 0, 0, 0 ) 0
+                }
 
 
 coordinatesToVector : ( Int, Int ) -> Vec2

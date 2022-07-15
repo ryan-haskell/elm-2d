@@ -1,9 +1,9 @@
 module Examples.Dungeon exposing (main)
 
 import Browser
-import Color
 import Dict exposing (Dict)
 import Elm2D
+import Elm2D.Color
 import Elm2D.Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 import Time
@@ -25,14 +25,14 @@ main =
 
 type alias Model =
     { counter : Int
-    , spritesheet : Maybe Spritesheet
+    , spritesheet : Spritesheet
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { counter = 0
-      , spritesheet = Nothing
+      , spritesheet = Elm2D.Spritesheet.blank
       }
     , Elm2D.Spritesheet.load
         { tileSize = 16
@@ -47,7 +47,7 @@ init _ =
 
 
 type Msg
-    = LoadedSpritesheet (Maybe Spritesheet)
+    = LoadedSpritesheet Spritesheet
     | Tick
 
 
@@ -75,45 +75,21 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view model =
-    model.spritesheet
-        |> Maybe.map (viewMap model)
-        |> Maybe.withDefault (Html.text "Loading...")
-
-
-viewMap : Model -> Spritesheet -> Html Msg
-viewMap { counter } spritesheet =
-    Html.div []
-        [ Html.node "style"
-            []
-            [ Html.text """
-                html, body, div {
-                  height: 100%;
-                  margin: 0;
-                }
-                div { 
-                  background: black;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                } 
-              """
-            ]
-        , Elm2D.view
-            { size =
-                ( tileSize * dimensions.width
-                , tileSize * dimensions.height + tileSize
-                )
-            , background = Color.rgb255 0 0 0
-            }
-            (List.concat
-                [ backgroundLayer
-                    |> List.map (viewTile counter spritesheet)
-                , Dict.toList map
-                    |> List.map (viewTile counter spritesheet)
-                ]
+view { counter, spritesheet } =
+    Elm2D.view
+        { size =
+            ( tileSize * dimensions.width
+            , tileSize * dimensions.height + tileSize
             )
-        ]
+        , background = Elm2D.Color.fromRgb255 ( 0, 0, 0 )
+        }
+        (List.concat
+            [ backgroundLayer
+                |> List.map (viewTile counter spritesheet)
+            , Dict.toList map
+                |> List.map (viewTile counter spritesheet)
+            ]
+        )
 
 
 
@@ -170,12 +146,12 @@ map =
     fromString """
 `xxxxxx=`xxxxxxxxxx=
 <      ><          >
-<      ><          >
+< K    ><          >
 <      .,      K   >
 <      SS          >
 <      SS          >
 <      ><          >
-<      ><          >
+<      ><   K      >
 Z___S__?<          >
 `xxxSxx=<          >
 <   S  ><          >

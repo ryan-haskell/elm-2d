@@ -1,20 +1,19 @@
 module Elm2D exposing
-    ( view
+    ( Html, view, viewCustom
     , Element, rectangle, sprite
     )
 
 {-|
 
-@docs view
-@docs Size, Position
+@docs Html, view, viewCustom
 
 @docs Element, rectangle, sprite
 
 -}
 
-import Color exposing (Color)
+import Elm2D.Color
 import Elm2D.Spritesheet exposing (Sprite)
-import Html exposing (Html)
+import Html
 import Html.Attributes as Attr
 import Internals.Renderables.Rectangle as Rectangle
 import Internals.Renderables.Sprite as Sprite
@@ -23,17 +22,50 @@ import Internals.Sprite
 import WebGL
 
 
+type alias Html msg =
+    Html.Html msg
+
+
 view :
     { size : ( Float, Float )
-    , background : Color
+    , background : Elm2D.Color.Color
     }
     -> List Element
     -> Html msg
-view options children =
+view options elements =
+    Html.div []
+        [ Html.node "style"
+            []
+            [ Html.text """
+                html, body, div {
+                  height: 100%;
+                  margin: 0;
+                }
+                body > div {
+                  background: black;
+                  color: white;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                } 
+              """
+            ]
+        , viewCustom options elements
+        ]
+
+
+viewCustom :
+    { size : ( Float, Float )
+    , background : Elm2D.Color.Color
+    }
+    -> List Element
+    -> Html msg
+viewCustom options children =
     WebGL.toHtml
         [ Attr.width (floor (Tuple.first options.size))
         , Attr.height (floor (Tuple.second options.size))
-        , Attr.style "background-color" (Color.toCssString options.background)
+        , Attr.style "background-color" (Elm2D.Color.toCssString options.background)
         ]
         -- reverse & map
         (List.foldl
@@ -55,7 +87,7 @@ type Element
 rectangle :
     { size : ( Float, Float )
     , position : ( Float, Float )
-    , color : Color
+    , color : Elm2D.Color.Color
     }
     -> Element
 rectangle =

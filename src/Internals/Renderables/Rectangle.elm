@@ -1,6 +1,6 @@
 module Internals.Renderables.Rectangle exposing (Options, view)
 
-import Color exposing (Color)
+import Elm2D.Color exposing (Color)
 import Internals.Color
 import Internals.Position exposing (Position)
 import Internals.Settings exposing (Settings)

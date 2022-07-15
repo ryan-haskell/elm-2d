@@ -1,12 +1,12 @@
 module Elm2D.Spritesheet exposing
-    ( Spritesheet, load
+    ( Spritesheet, blank, load
     , Sprite, select, region
     , Animation, animation, frame
     )
 
 {-|
 
-@docs Spritesheet, load
+@docs Spritesheet, blank, load
 @docs Sprite, select, region
 @docs Animation, animation, frame
 
@@ -19,7 +19,7 @@ import WebGL.Texture exposing (defaultOptions)
 
 
 type Spritesheet
-    = Spritesheet Int WebGL.Texture.Texture
+    = Spritesheet Int (Maybe WebGL.Texture.Texture)
 
 
 options_ : WebGL.Texture.Options
@@ -27,18 +27,24 @@ options_ =
     { defaultOptions | magnify = WebGL.Texture.nearest }
 
 
+blank : Spritesheet
+blank =
+    Spritesheet 1 Nothing
+
+
 load :
     { tileSize : Int
     , file : String
-    , onLoad : Maybe Spritesheet -> msg
+    , onLoad : Spritesheet -> msg
     }
     -> Cmd msg
 load options =
     WebGL.Texture.loadWith options_ options.file
         |> Task.attempt
-            (Result.toMaybe
-                >> Maybe.map (Spritesheet options.tileSize)
-                >> options.onLoad
+            (\result ->
+                Result.toMaybe result
+                    |> Spritesheet options.tileSize
+                    |> options.onLoad
             )
 
 

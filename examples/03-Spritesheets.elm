@@ -1,9 +1,9 @@
 module Examples.Spritesheets exposing (main)
 
 import Browser
-import Color
 import Elm2D
-import Elm2D.Spritesheet as Spritesheet exposing (Sprite, Spritesheet)
+import Elm2D.Color
+import Elm2D.Spritesheet exposing (Sprite, Spritesheet)
 import Html exposing (Html)
 
 
@@ -22,15 +22,15 @@ main =
 
 
 type alias Model =
-    { maybeSpritesheet : Maybe Spritesheet
+    { spritesheet : Spritesheet
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { maybeSpritesheet = Nothing
+    ( { spritesheet = Elm2D.Spritesheet.blank
       }
-    , Spritesheet.load
+    , Elm2D.Spritesheet.load
         { tileSize = 16
         , file = "assets/tileset.png" -- Artwork from: https://fikry13.itch.io/another-rpg-tileset
         , onLoad = LoadedSpritesheet
@@ -43,14 +43,14 @@ init _ =
 
 
 type Msg
-    = LoadedSpritesheet (Maybe Spritesheet)
+    = LoadedSpritesheet Spritesheet
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        LoadedSpritesheet maybeSpritesheet ->
-            ( { model | maybeSpritesheet = maybeSpritesheet }
+        LoadedSpritesheet spritesheet ->
+            ( { model | spritesheet = spritesheet }
             , Cmd.none
             )
 
@@ -66,23 +66,13 @@ subscriptions _ =
 
 view : Model -> Html msg
 view model =
-    case model.maybeSpritesheet of
-        Nothing ->
-            Html.text "Loading..."
-
-        Just spritesheet ->
-            viewScene spritesheet
-
-
-viewScene : Spritesheet -> Html msg
-viewScene spritesheet =
     let
         sprites =
-            spritesFor spritesheet
+            spritesFor model.spritesheet
     in
     Elm2D.view
         { size = ( 640, 480 )
-        , background = Color.rgb 0.25 0.7 0.5
+        , background = Elm2D.Color.rgb ( 0.25, 0.7, 0.5 )
         }
         [ Elm2D.sprite
             { sprite = sprites.chest
@@ -143,10 +133,10 @@ spritesFor :
 spritesFor sheet =
     let
         select =
-            Spritesheet.select sheet
+            Elm2D.Spritesheet.select sheet
 
         region =
-            Spritesheet.region sheet
+            Elm2D.Spritesheet.region sheet
     in
     { chest = select ( 3, 6 )
     , rock = select ( 7, 4 )
